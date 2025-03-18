@@ -1,0 +1,760 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 1920px;
+    height: 1200px;
+    background-color: #F7F7F7;
+    font-family: Arial, sans-serif;
+    position: relative;
+}
+
+.keyboard-container {
+    width: 1920px;
+    height: 527px;
+    background-color: #E3E4E9;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transition: transform 0.3s ease;
+    transform: translateY(0);
+}
+
+.keyboard-container.hidden {
+    transform: translateY(100%);
+}
+
+.keyboard-system {
+    width: 1821px;
+    height: 65px;
+    background-color: #FFFFFF;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.input-preview {
+    width: 1821px;
+    height: 65px;
+    background-color: #FFFFFF;
+    margin: 0 auto;
+    display: none;
+    flex-direction: column;
+    padding: 0 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    position: relative;
+}
+
+.pinyin-display {
+    position: absolute;
+    top: -50px;
+    left: 0;
+    width: auto;
+    min-width: 50px;
+    height: 50px;
+    font-size: 28px;
+    color: #333333;
+    background-color: #FFFFFF;
+    border-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    transition: width 0.3s ease;
+}
+
+.word-suggestions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 50px;
+    font-size: 32px;
+    color: #333333;
+    height: 100%;
+    align-items: center;
+    padding-left: 54px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.word-suggestions::-webkit-scrollbar {
+    display: none;
+}
+
+.system-icons {
+    display: flex;
+    justify-content: center;
+    gap: 180px;
+    align-items: center;
+}
+
+.system-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+/* 系统图标尺寸定制 */
+.system-icons img[alt="剪切板"] {
+    width: 39px;
+    height: 39px;
+}
+
+.system-icons img[alt="输入法"] {
+    width: 39px;
+    height: 39px;
+}
+
+.system-icons img[alt="语音"] {
+    width: 31px;
+    height: 39px;
+}
+
+.system-icons img[alt="快捷键"] {
+    width: 74px;
+    height: 39px;
+}
+
+.system-icons img[alt="缩放"] {
+    width: 39px;
+    height: 39px;
+}
+
+.keyboard {
+    padding: 0 20px;
+    margin-top: 20px;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 13px;
+    margin-bottom: 13px;
+    position: relative;
+}
+
+/* 左侧功能键对齐 */
+.key-emoji,
+.key-ab,
+.key-shift-left,
+.key-symbol,
+.key-math,
+.key-back,
+.key-number-left {
+    padding-left: 30px;
+    justify-content: flex-start !important;
+}
+
+/* 右侧功能键对齐 */
+.key-backspace,
+.key-enter,
+.key-shift-right,
+.key-collapse,
+.key-number-right {
+    padding-right: 30px;
+    justify-content: flex-end !important;
+}
+
+.key {
+    height: 88px;
+    border: none;
+    border-radius: 5px;
+    font-size: 38px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* 普通字母键 */
+.key-letter {
+    width: 132px;
+    background-color: #FFFFFF;
+}
+
+/* 带数字的字母键样式 */
+.key-with-number {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 88px;
+    box-sizing: border-box;
+    padding-bottom: 5px;
+}
+
+.number-top {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    color: #A9A9B6;
+    font-size: 26px;
+    text-align: center;
+    min-width: 16px;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 26px;
+    line-height: 1;
+}
+
+.number-top.number-active {
+    color: #6C7FDB;
+    transform: scale(1.2);
+}
+
+.letter-bottom {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    color: #333333;
+    font-size: 38px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 38px;
+    line-height: 1;
+}
+
+/* 特殊键 */
+.key-special {
+    background-color: #C8C8D2;
+    transition: background-color 0.2s ease;
+}
+
+.key-special.pressed {
+    background-color: #9E9EA7;
+}
+
+.key-emoji, .key-backspace {
+    width: 179px;
+}
+
+.key-ab, .key-enter {
+    width: 252px;
+}
+
+.key-shift-left {
+    width: 324px;
+}
+
+.key-shift-right {
+    width: 179px;
+}
+
+.key-symbol {
+    width: 179px;
+}
+
+.key-math {
+    width: 179px;
+}
+
+.key-number {
+    width: 205px;
+}
+
+.key-space {
+    width: 1002px;
+    background-color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.key-language {
+    width: 205px;
+    background-size: 79px 34px;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    font-size: 0; /* 隐藏文本 */
+}
+
+.key-collapse {
+    width: 179px;
+}
+
+.key:hover {
+    opacity: 0.9;
+}
+
+.key:active {
+    transform: translateY(1px);
+}
+
+.key-letter.pressed {
+    background-color: #C8C8D2;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion:first-child {
+    color: #6C7FDB;
+}
+
+.suggestion:hover {
+    background-color: #f0f0f0;
+    color: #1a73e8;
+}
+
+.key-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.input-display-area {
+    width: 1820px;
+    min-height: 120px;
+    height: auto;
+    background-color: #FFFFFF;
+    margin: 50px auto 20px;
+    border-radius: 5px;
+    padding: 20px;
+    font-size: 38px;
+    color: #333333;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    position: relative;
+    transition: height 0.3s ease;
+    line-height: 38px;
+}
+
+.pinyin-input-area {
+    position: absolute;
+    top: -50px;
+    left: 20px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    color: #666666;
+    background-color: transparent;
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: width 0.3s;
+}
+
+.input-text {
+    min-height: 45px;
+    height: auto;
+    word-break: break-all;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+}
+
+.cursor {
+    width: 2px;
+    height: 45px;
+    background-color: #333333;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* 回车键的图标替换 */
+.key-enter {
+    width: 252px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 退格键图标大小调整 */
+.key-backspace {
+    width: 179px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.key-backspace .key-icon {
+    width: 39px;
+    height: 26px;
+    object-fit: contain;
+}
+
+/* 中英文切换键的图标切换逻辑将在 script.js 中实现 */
+
+.key-space .key-icon {
+    width: 77px;
+    height: 31px;
+    object-fit: contain;
+}
+
+.key-enter .key-icon {
+    width: 36px;
+    height: 23px;
+    object-fit: contain;
+}
+
+.key-ab .key-icon {
+    width: 39px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.key-symbol .key-icon, .key-math .key-icon {
+    width: 33px;
+    height: 33px;
+    object-fit: contain;
+}
+
+.key-number .key-icon {
+    width: 57px;
+    height: 26px;
+    object-fit: contain;
+}
+
+/* 符号键盘样式 */
+.key-symbol-key {
+    width: 132px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 88px;
+    box-sizing: border-box;
+}
+
+.symbol-top {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    right: 0;
+    color: #A9A9B6;
+    font-size: 26px;
+    text-align: center;
+    min-width: 16px;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 26px;
+    line-height: 1;
+}
+
+.symbol-bottom {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    color: #333333;
+    font-size: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    line-height: 1;
+}
+
+/* 确保中文符号正确对齐 */
+.key-back-to-letters, .key-back {
+    width: 252px;
+}
+
+.key-number-left {
+    width: 324px;
+}
+
+.key-number-right {
+    width: 179px;
+}
+
+.key-pinyin-left, .key-pinyin-right {
+    width: 205px;
+}
+
+/* 左侧功能键对齐 - 符号键盘 */
+.key-number-left,
+.key-back-to-letters,
+.key-back {
+    padding-left: 30px;
+    justify-content: flex-start !important;
+}
+
+/* 右侧功能键对齐 - 符号键盘 */
+.key-number-right {
+    padding-right: 30px;
+    justify-content: flex-end !important;
+}
+
+.key-number-left .key-icon,
+.key-number-right .key-icon {
+    width: 56px;
+    height: 26px;
+    object-fit: contain;
+}
+
+.key-pinyin-left .key-icon,
+.key-pinyin-right .key-icon {
+    width: 69px;
+    height: 33px;
+    object-fit: contain;
+}
+
+.key-back .key-icon {
+    width: 39px;
+    height: 28px;
+    object-fit: contain;
+}
+
+/* 数学符号键盘样式 */
+.key-math-key {
+    width: 132px;
+    background-color: #FFFFFF;
+    font-size: 38px;
+}
+
+.symbol-top.symbol-active {
+    color: #6C7FDB;
+    transform: scale(1.2);
+}
+
+/* 数字键盘样式 */
+.key-number-key {
+    width: 132px;
+    background-color: #FFFFFF;
+    font-size: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.key-symbol-left, .key-symbol-right {
+    width: 179px;
+}
+
+.key-abc {
+    width: 252px;
+}
+
+/* 左侧功能键对齐 - 数字键盘 */
+.key-symbol-left,
+.key-abc {
+    padding-left: 30px;
+    justify-content: flex-start !important;
+}
+
+/* 右侧功能键对齐 - 数字键盘 */
+.key-symbol-right {
+    padding-right: 30px;
+    justify-content: flex-end !important;
+}
+
+.key-symbol-left .key-icon,
+.key-symbol-right .key-icon {
+    width: 33px;
+    height: 33px;
+    object-fit: contain;
+}
+
+.key-abc .key-icon {
+    width: 39px;
+    height: 28px;
+    object-fit: contain;
+}
+
+/* 预测字选择相关样式 */
+.word-suggestions-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.word-suggestions {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 50px;
+    padding: 5px;
+    flex: 1;
+}
+
+.dropdown-button {
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+
+.dropdown-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.prediction-panel {
+    display: none;
+    width: 1821px;
+    height: 388px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 26px -19px;
+    position: relative;
+}
+
+.prediction-panel.active {
+    display: block;
+}
+
+.prediction-words-container {
+    width: 1615px;
+    height: 388px;
+    float: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.prediction-row {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    height: 97px;
+    align-items: center;
+    gap: 0;
+}
+
+.prediction-word {
+    width: 132px;
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    cursor: pointer;
+    margin: 0;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.prediction-word:hover {
+    background-color: #f0f0f0;
+}
+
+.prediction-controls {
+    width: 179px;
+    height: 388px;
+    float: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0px 0px;
+}
+
+.prediction-control {
+    width: 179px;
+    height: 88px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.prediction-control:last-child {
+    margin-bottom: 0;
+}
+
+.prediction-control img {
+    width: 32px;
+    height: 32px;
+}
+
+.backspace-btn, .up-btn, .down-btn {
+    background-color: #C8C8D2;
+}
+
+.return-btn {
+    background-color: #647DFC;
+}
+
+.keyboard-hidden {
+    display: none !important;
+}
+
+.prediction-control img {
+    width: 32px;
+    height: 32px;
+}
+
+.backspace-btn img {
+    width: 39px;
+    height: 26px;
+    object-fit: contain;
+}
+
+.return-text {
+    font-size: 32px;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+.key-comma, .key-period {
+    width: 132px;
+    background-color: #FFFFFF;
+    position: relative;
+}
+
+.key-comma .symbol-top,
+.key-period .symbol-top {
+    display: none;
+}
+
+.key-comma .symbol-bottom,
+.key-period .symbol-bottom {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    right: 0;
+    color: #333333;
+    font-size: 38px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 38px;
+    line-height: 1;
+} 

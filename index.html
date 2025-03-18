@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>虚拟键盘</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- 使用 CDN 加载 pinyin-pro 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.19.6/dist/index.js"></script>
+    <script>
+        // 确保 pinyin 对象在全局可用
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // 检查 pinyinPro 对象是否存在（CDN 版本可能导出为 pinyinPro）
+                if (typeof pinyinPro !== 'undefined') {
+                    window.pinyin = pinyinPro;
+                    console.log('拼音库加载成功 (pinyinPro)');
+                } else if (typeof pinyin !== 'undefined') {
+                    window.pinyin = pinyin;
+                    console.log('拼音库加载成功 (pinyin)');
+                } else {
+                    console.error('拼音库加载失败');
+                }
+            } catch (e) {
+                console.error('拼音库初始化错误:', e);
+            }
+        });
+    </script>
+    <!-- 然后加载主脚本 -->
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="input-display-area">
+        <div id="inputText" class="input-text" contenteditable="true"></div>
+        <div class="cursor"></div>
+    </div>
+    <div class="keyboard-container">
+        <div class="input-preview">
+            <div class="pinyin-display"></div>
+            <div class="word-suggestions-container">
+                <div class="word-suggestions"></div>
+                <button class="dropdown-button">
+                    <img src="icons/keyboard/dropdown-icon.svg" alt="下拉" class="dropdown-icon">
+                </button>
+            </div>
+            <div class="prediction-panel">
+                <div class="prediction-words-container">
+                    <div class="prediction-row" id="prediction-row-1"></div>
+                    <div class="prediction-row" id="prediction-row-2"></div>
+                    <div class="prediction-row" id="prediction-row-3"></div>
+                    <div class="prediction-row" id="prediction-row-4"></div>
+                </div>
+                <div class="prediction-controls">
+                    <button class="prediction-control backspace-btn">
+                        <img src="icons/keyboard/backspace.svg" alt="退格">
+                    </button>
+                    <button class="prediction-control up-btn">
+                        <img src="icons/keyboard/up-icon.svg" alt="上翻">
+                    </button>
+                    <button class="prediction-control down-btn">
+                        <img src="icons/keyboard/down-icon.svg" alt="下翻">
+                    </button>
+                    <button class="prediction-control return-btn">
+                        <span class="return-text">返回</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="keyboard-system">
+            <div class="system-icons">
+                <img src="icons/keyboard/clipboard.svg" alt="剪切板" class="system-icon">
+                <img src="icons/keyboard/input.svg" alt="输入法" class="system-icon">
+                <img src="icons/keyboard/voice.svg" alt="语音" class="system-icon">
+                <img src="icons/keyboard/shortcut.svg" alt="快捷键" class="system-icon">
+                <img src="icons/keyboard/zoom.svg" alt="缩放" class="system-icon">
+            </div>
+        </div>
+        <div class="keyboard">
+            <div class="keyboard-row">
+                <button class="key key-special key-emoji">
+                    <img src="icons/keyboard/emoji.svg" alt="表情" class="key-icon">
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">1</span>
+                    <span class="letter-bottom">q</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">2</span>
+                    <span class="letter-bottom">w</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">3</span>
+                    <span class="letter-bottom">e</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">4</span>
+                    <span class="letter-bottom">r</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">5</span>
+                    <span class="letter-bottom">t</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">6</span>
+                    <span class="letter-bottom">y</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">7</span>
+                    <span class="letter-bottom">u</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">8</span>
+                    <span class="letter-bottom">i</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">9</span>
+                    <span class="letter-bottom">o</span>
+                </button>
+                <button class="key key-letter key-with-number">
+                    <span class="number-top">0</span>
+                    <span class="letter-bottom">p</span>
+                </button>
+                <button class="key key-special key-backspace">
+                    <img src="icons/keyboard/backspace.svg" alt="退格" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-ab">
+                    <img src="icon/keyboard/ab-icon.svg" alt="字母" class="key-icon">
+                </button>
+                <button class="key key-letter">a</button>
+                <button class="key key-letter">s</button>
+                <button class="key key-letter">d</button>
+                <button class="key key-letter">f</button>
+                <button class="key key-letter">g</button>
+                <button class="key key-letter">h</button>
+                <button class="key key-letter">j</button>
+                <button class="key key-letter">k</button>
+                <button class="key key-letter">l</button>
+                <button class="key key-special key-enter">
+                    <img src="icon/keyboard/enter-icon.svg" alt="回车" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-shift-left">
+                    <img src="icons/keyboard/shift.svg" alt="大写" class="key-icon">
+                </button>
+                <button class="key key-letter">z</button>
+                <button class="key key-letter">x</button>
+                <button class="key key-letter">c</button>
+                <button class="key key-letter">v</button>
+                <button class="key key-letter">b</button>
+                <button class="key key-letter">n</button>
+                <button class="key key-letter">m</button>
+                <div class="key key-comma">
+                    <span class="symbol-top">，</span>
+                    <span class="symbol-bottom">，</span>
+                </div>
+                <div class="key key-period">
+                    <span class="symbol-top">。</span>
+                    <span class="symbol-bottom">。</span>
+                </div>
+                <button class="key key-special key-shift-right">
+                    <img src="icons/keyboard/shift.svg" alt="大写" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-symbol">
+                    <img src="icon/keyboard/symbol-icon.svg" alt="符号" class="key-icon">
+                </button>
+                <button class="key key-special key-number">
+                    <img src="icon/keyboard/number-icon.svg" alt="数字" class="key-icon">
+                </button>
+                <button class="key key-space">
+                    <img src="icon/keyboard/space-icon.svg" alt="空格" class="key-icon">
+                </button>
+                <div class="key key-special key-language" data-key="language">中/英</div>
+                <button class="key key-special key-collapse">
+                    <img src="icons/keyboard/collapse.svg" alt="收起" class="key-icon">
+                </button>
+            </div>
+        </div>
+
+        <!-- 符号键盘页 -->
+        <div class="keyboard symbol-keyboard" style="display: none;">
+            <div class="keyboard-row">
+                <button class="key key-special key-emoji">
+                    <img src="icons/keyboard/emoji.svg" alt="表情" class="key-icon">
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">°</span>
+                    <span class="symbol-bottom">!</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">`</span>
+                    <span class="symbol-bottom">@</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">·</span>
+                    <span class="symbol-bottom">#</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">€</span>
+                    <span class="symbol-bottom">$</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">£</span>
+                    <span class="symbol-bottom">%</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">¥</span>
+                    <span class="symbol-bottom">^</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">₩</span>
+                    <span class="symbol-bottom">&</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">•</span>
+                    <span class="symbol-bottom">*</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">{</span>
+                    <span class="symbol-bottom">(</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">}</span>
+                    <span class="symbol-bottom">)</span>
+                </button>
+                <button class="key key-special key-backspace">
+                    <img src="icons/keyboard/backspace.svg" alt="退格" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-back">
+                    <img src="icon/keyboard/back-icon.svg" alt="返回" class="key-icon">
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">_</span>
+                    <span class="symbol-bottom">-</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">±</span>
+                    <span class="symbol-bottom">+</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">≠</span>
+                    <span class="symbol-bottom">=</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">《</span>
+                    <span class="symbol-bottom">〈</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">》</span>
+                    <span class="symbol-bottom">〉</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">「</span>
+                    <span class="symbol-bottom">『</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">」</span>
+                    <span class="symbol-bottom">』</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">¦</span>
+                    <span class="symbol-bottom">|</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">¬</span>
+                    <span class="symbol-bottom">\</span>
+                </button>
+                <button class="key key-special key-enter">
+                    <img src="icon/keyboard/enter-icon.svg" alt="回车" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-number-left">
+                    <img src="icon/keyboard/number-icon.svg" alt="数字" class="key-icon">
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">…</span>
+                    <span class="symbol-bottom">:</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">§</span>
+                    <span class="symbol-bottom">;</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">„</span>
+                    <span class="symbol-bottom">"</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">"</span>
+                    <span class="symbol-bottom">'</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">≤</span>
+                    <span class="symbol-bottom"><</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">≥</span>
+                    <span class="symbol-bottom">></span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">¿</span>
+                    <span class="symbol-bottom">?</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">÷</span>
+                    <span class="symbol-bottom">/</span>
+                </button>
+                <button class="key key-symbol-key">
+                    <span class="symbol-top">©</span>
+                    <span class="symbol-bottom">®</span>
+                </button>
+                <button class="key key-special key-number-right">
+                    <img src="icon/keyboard/number-icon.svg" alt="数字" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-math">
+                    <img src="icon/keyboard/math-icon.svg" alt="数学" class="key-icon">
+                </button>
+                <button class="key key-special key-pinyin-left">
+                    <img src="icon/keyboard/pinyin-icon.svg" alt="拼音" class="key-icon">
+                </button>
+                <button class="key key-space">
+                    <img src="icon/keyboard/space-icon.svg" alt="空格" class="key-icon">
+                </button>
+                <button class="key key-special key-pinyin-right">
+                    <img src="icon/keyboard/pinyin-icon.svg" alt="拼音" class="key-icon">
+                </button>
+                <button class="key key-special key-collapse">
+                    <img src="icons/keyboard/collapse.svg" alt="收起" class="key-icon">
+                </button>
+            </div>
+        </div>
+
+        <!-- 数学符号键盘页 -->
+        <div class="keyboard math-keyboard" style="display: none;">
+            <div class="keyboard-row">
+                <button class="key key-special key-emoji">
+                    <img src="icons/keyboard/emoji.svg" alt="表情" class="key-icon">
+                </button>
+                <button class="key key-math-key">±</button>
+                <button class="key key-math-key">×</button>
+                <button class="key key-math-key">÷</button>
+                <button class="key key-math-key">√</button>
+                <button class="key key-math-key">∞</button>
+                <button class="key key-math-key">≈</button>
+                <button class="key key-math-key">≠</button>
+                <button class="key key-math-key">≤</button>
+                <button class="key key-math-key">≥</button>
+                <button class="key key-math-key">π</button>
+                <button class="key key-special key-backspace">
+                    <img src="icons/keyboard/backspace.svg" alt="退格" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-back">
+                    <img src="icon/keyboard/back-icon.svg" alt="返回" class="key-icon">
+                </button>
+                <button class="key key-math-key">∑</button>
+                <button class="key key-math-key">∫</button>
+                <button class="key key-math-key">∂</button>
+                <button class="key key-math-key">∇</button>
+                <button class="key key-math-key">∝</button>
+                <button class="key key-math-key">∈</button>
+                <button class="key key-math-key">∉</button>
+                <button class="key key-math-key">∩</button>
+                <button class="key key-math-key">∪</button>
+                <button class="key key-special key-enter">
+                    <img src="icon/keyboard/enter-icon.svg" alt="回车" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-number-left">
+                    <img src="icon/keyboard/number-icon.svg" alt="数字" class="key-icon">
+                </button>
+                <button class="key key-math-key">α</button>
+                <button class="key key-math-key">β</button>
+                <button class="key key-math-key">γ</button>
+                <button class="key key-math-key">δ</button>
+                <button class="key key-math-key">θ</button>
+                <button class="key key-math-key">λ</button>
+                <button class="key key-math-key">μ</button>
+                <button class="key key-math-key">σ</button>
+                <button class="key key-math-key">ω</button>
+                <button class="key key-special key-number-right">
+                    <img src="icon/keyboard/number-icon.svg" alt="数字" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-symbol">
+                    <img src="icon/keyboard/symbol-icon.svg" alt="符号" class="key-icon">
+                </button>
+                <button class="key key-special key-pinyin-left">
+                    <img src="icon/keyboard/pinyin-icon.svg" alt="拼音" class="key-icon">
+                </button>
+                <button class="key key-space">
+                    <img src="icon/keyboard/space-icon.svg" alt="空格" class="key-icon">
+                </button>
+                <button class="key key-special key-pinyin-right">
+                    <img src="icon/keyboard/pinyin-icon.svg" alt="拼音" class="key-icon">
+                </button>
+                <button class="key key-special key-collapse">
+                    <img src="icons/keyboard/collapse.svg" alt="收起" class="key-icon">
+                </button>
+            </div>
+        </div>
+        
+        <!-- 数字键盘页 -->
+        <div class="keyboard number-keyboard" style="display: none;">
+            <div class="keyboard-row">
+                <button class="key key-special key-emoji">
+                    <img src="icons/keyboard/emoji.svg" alt="表情" class="key-icon">
+                </button>
+                <button class="key key-number-key">1</button>
+                <button class="key key-number-key">2</button>
+                <button class="key key-number-key">3</button>
+                <button class="key key-number-key">4</button>
+                <button class="key key-number-key">5</button>
+                <button class="key key-number-key">6</button>
+                <button class="key key-number-key">7</button>
+                <button class="key key-number-key">8</button>
+                <button class="key key-number-key">9</button>
+                <button class="key key-number-key">0</button>
+                <button class="key key-special key-backspace">
+                    <img src="icons/keyboard/backspace.svg" alt="退格" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-back">
+                    <img src="icon/keyboard/back-icon.svg" alt="返回" class="key-icon">
+                </button>
+                <button class="key key-number-key">@</button>
+                <button class="key key-number-key">#</button>
+                <button class="key key-number-key">¥</button>
+                <button class="key key-number-key">/</button>
+                <button class="key key-number-key">（</button>
+                <button class="key key-number-key">）</button>
+                <button class="key key-number-key">「</button>
+                <button class="key key-number-key">」</button>
+                <button class="key key-number-key">'</button>
+                <button class="key key-special key-enter">
+                    <img src="icon/keyboard/enter-icon.svg" alt="回车" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-number-left">
+                    <img src="icon/keyboard/number-icon.svg" alt="数字" class="key-icon">
+                </button>
+                <button class="key key-number-key">%</button>
+                <button class="key key-number-key">^</button>
+                <button class="key key-number-key">&</button>
+                <button class="key key-number-key">…</button>
+                <button class="key key-number-key">、</button>
+                <button class="key key-number-key">；</button>
+                <button class="key key-number-key">：</button>
+                <div class="key key-comma">
+                    <span class="symbol-top">,</span>
+                    <span class="symbol-bottom">,</span>
+                </div>
+                <div class="key key-period">
+                    <span class="symbol-top">.</span>
+                    <span class="symbol-bottom">.</span>
+                </div>
+                <button class="key key-special key-number-right">
+                    <img src="icon/keyboard/number-icon.svg" alt="数字" class="key-icon">
+                </button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key key-special key-symbol">
+                    <img src="icon/keyboard/symbol-icon.svg" alt="符号" class="key-icon">
+                </button>
+                <button class="key key-special key-pinyin-left">
+                    <img src="icon/keyboard/pinyin-icon.svg" alt="拼音" class="key-icon">
+                </button>
+                <button class="key key-space">
+                    <img src="icon/keyboard/space-icon.svg" alt="空格" class="key-icon">
+                </button>
+                <button class="key key-special key-pinyin-right">
+                    <img src="icon/keyboard/pinyin-icon.svg" alt="拼音" class="key-icon">
+                </button>
+                <button class="key key-special key-collapse">
+                    <img src="icons/keyboard/collapse.svg" alt="收起" class="key-icon">
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
