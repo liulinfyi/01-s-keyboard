@@ -323,6 +323,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 调整输入区域高度
+    function adjustInputAreaHeight() {
+        const inputArea = document.querySelector('.input-display-area');
+        const inputText = document.querySelector('#inputText');
+        if (inputArea && inputText) {
+            const textHeight = inputText.offsetHeight;
+            const minHeight = 120; // 最小高度
+            const newHeight = Math.max(minHeight, textHeight + 40); // 40px 为上下padding的总和
+            inputArea.style.height = `${newHeight}px`;
+            
+            // 调整光标高度
+            const cursor = document.querySelector('.cursor');
+            if (cursor) {
+                cursor.style.height = `${textHeight}px`;
+            }
+        }
+    }
+
     // 处理特殊按键
     function handleSpecialKey(key) {
         switch(key) {
