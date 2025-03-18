@@ -5,22 +5,44 @@
 }
 
 body {
-    width: 1920px;
-    height: 1200px;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
     background-color: #F7F7F7;
     font-family: Arial, sans-serif;
     position: relative;
+    overflow: hidden;
+}
+
+:root {
+    --keyboard-scale: 1;
+    --keyboard-width: min(100vw, 1821px);
+    --key-base-width: calc(var(--keyboard-width) / 14);
+    --key-spacing: calc(var(--key-base-width) * 0.1);
+    --key-height: calc(var(--key-base-width) * 0.67);
+    --font-size-large: calc(var(--key-base-width) * 0.29);
+    --font-size-small: calc(var(--key-base-width) * 0.2);
 }
 
 .keyboard-container {
-    width: 1920px;
-    height: 527px;
-    background-color: #E3E4E9;
-    position: absolute;
+    width: 100%;
+    max-width: var(--keyboard-width);
+    margin: 0 auto;
+    background-color: #F2F3F5;
+    border-radius: 10px 10px 0 0;
+    padding: 13px 0;
+    position: fixed;
     bottom: 0;
-    left: 0;
-    transition: transform 0.3s ease;
-    transform: translateY(0);
+    left: 50%;
+    transform: translateX(-50%) scale(var(--keyboard-scale));
+    transform-origin: bottom center;
+    will-change: transform;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    z-index: 1000;
+    transition: transform 0.2s ease;
 }
 
 .keyboard-container.hidden {
@@ -326,22 +348,18 @@ body {
 }
 
 .input-display-area {
-    width: 1820px;
-    min-height: 120px;
-    height: auto;
-    background-color: #FFFFFF;
-    margin: 50px auto 20px;
-    border-radius: 5px;
-    padding: 20px;
-    font-size: 38px;
-    color: #333333;
-    display: flex;
-    align-items: center;
-    text-align: center;
-    align-items: center;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: var(--keyboard-width);
+    margin: 0 auto;
     position: relative;
-    transition: height 0.3s ease;
+    background-color: #FFFFFF;
+    padding: 20px;
+    box-sizing: border-box;
+    transform: scale(var(--keyboard-scale));
+    transform-origin: bottom center;
+    will-change: transform;
+    touch-action: manipulation;
+    transition: transform 0.2s ease;
     line-height: 38px;
 }
 
@@ -757,4 +775,213 @@ body {
     align-items: center;
     height: 38px;
     line-height: 1;
+}
+
+/* 缩放控制按钮 */
+.scale-controls {
+    position: fixed;
+    right: 20px;
+    bottom: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1001;
+}
+
+.scale-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: #647DFC;
+    border: none;
+    color: white;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scale-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.scale-value {
+    width: 40px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 添加媒体查询以适应不同屏幕 */
+@media screen and (max-width: 768px) {
+    :root {
+        --keyboard-scale: 0.9;
+        --keyboard-width: 100vw;
+        --key-base-width: calc(var(--keyboard-width) / 16);
+        --key-height: calc(var(--key-base-width) * 0.55);
+        --font-size-large: calc(var(--key-base-width) * 0.22);
+        --font-size-small: calc(var(--key-base-width) * 0.16);
+    }
+    
+    .keyboard-container {
+        width: 100vw;
+        max-width: none;
+        padding: 8px 0;
+        transform: scale(var(--keyboard-scale));
+    }
+    
+    .input-display-area {
+        width: 100vw;
+        max-width: none;
+        padding: 15px;
+        transform: scale(var(--keyboard-scale));
+    }
+    
+    .keyboard {
+        padding: 0 4px;
+        margin-top: 4px;
+    }
+    
+    .keyboard-row {
+        margin-bottom: 4px;
+    }
+
+    .input-display-area {
+        height: 60px;
+        margin: 15px auto;
+        padding: 8px;
+        font-size: 24px;
+    }
+
+    .system-icons {
+        gap: 40px;
+        height: 24px;
+    }
+
+    .system-icon {
+        height: 24px;
+    }
+
+    .word-suggestions {
+        font-size: 20px;
+        gap: 20px;
+        padding-left: 20px;
+    }
+
+    .key-space {
+        width: calc(var(--key-base-width) * 7);
+    }
+
+    .key-shift-left {
+        width: calc(var(--key-base-width) * 2);
+    }
+
+    .key-ab, .key-enter {
+        width: calc(var(--key-base-width) * 1.6);
+    }
+
+    .key-language {
+        width: calc(var(--key-base-width) * 1.3);
+    }
+}
+
+@media screen and (max-height: 600px) {
+    :root {
+        --keyboard-scale: 0.8;
+        --key-height: calc(var(--key-base-width) * 0.6);
+    }
+    
+    .keyboard-container {
+        padding: 4px 0;
+        transform: scale(var(--keyboard-scale));
+    }
+    
+    .input-display-area {
+        padding: 10px;
+        transform: scale(var(--keyboard-scale));
+    }
+    
+    .keyboard {
+        margin-top: 4px;
+    }
+    
+    .keyboard-row {
+        margin-bottom: 4px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    :root {
+        --key-base-width: calc(var(--keyboard-width) / 18);
+        --key-height: calc(var(--key-base-width) * 0.5);
+        --font-size-large: calc(var(--key-base-width) * 0.2);
+        --font-size-small: calc(var(--key-base-width) * 0.14);
+    }
+
+    .keyboard-container {
+        padding: 2px 0;
+    }
+
+    .keyboard {
+        padding: 0 2px;
+        margin-top: 2px;
+    }
+
+    .keyboard-row {
+        margin-bottom: 2px;
+        gap: calc(var(--key-spacing) * 0.5);
+    }
+
+    .input-display-area {
+        height: 50px;
+        margin: 10px auto;
+        padding: 6px;
+        font-size: 20px;
+    }
+
+    .system-icons {
+        gap: 20px;
+        height: 20px;
+    }
+
+    .system-icon {
+        height: 20px;
+    }
+
+    .word-suggestions {
+        font-size: 16px;
+        gap: 15px;
+        padding-left: 15px;
+    }
+}
+
+/* 确保键盘内部元素也能正确缩放 */
+.keyboard, .symbol-keyboard, .math-keyboard, .number-keyboard {
+    transform-origin: bottom center;
+    will-change: transform;
+    touch-action: manipulation;
+}
+
+/* 添加过渡效果使缩放更流畅 */
+.keyboard-container, .input-display-area {
+    transition: transform 0.1s ease;
+}
+
+@media screen and (max-width: 768px) {
+    .keyboard-container {
+        transform-origin: bottom center;
+    }
+    
+    .input-display-area {
+        transform-origin: bottom center;
+    }
 } 

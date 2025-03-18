@@ -28,6 +28,12 @@
     </script>
     <!-- 然后加载主脚本 -->
     <script src="script.js" defer></script>
+    <!-- 引入JavaScript文件 -->
+    <script type="module" src="main.js"></script>
+    <script type="module" src="keyboard-module.js"></script>
+    <script type="module" src="scale-manager.js"></script>
+    <script type="module" src="keyboard-elements.js"></script>
+    <script type="module" src="pinyin-data.js"></script>
 </head>
 <body>
     <div class="input-display-area">
@@ -491,6 +497,13 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- 添加缩放控制按钮 -->
+    <div class="scale-controls">
+        <button class="scale-button" id="scaleUp">+</button>
+        <div class="scale-value" id="scaleValue">100%</div>
+        <button class="scale-button" id="scaleDown">-</button>
     </div>
 </body>
 </html> 
