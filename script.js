@@ -1,190 +1,32 @@
 // 引入拼音助手
 // import { getCandidateWords } from './pinyin-helper.js';
 
-// 键盘模块
-const KeyboardModule = (function() {
-    // 私有变量
-    let scale = 1;
-    let lastScale = 1;
-    let startDist = 0;
-    let lastTap = 0;
-    const MIN_SCALE = 0.5;
-    const MAX_SCALE = 2;
-
-    // DOM元素
-    const elements = {
-        keyboard: document.querySelector('.keyboard'),
-        symbolKeyboard: document.querySelector('.symbol-keyboard'),
-        mathKeyboard: document.querySelector('.math-keyboard'),
-        numberKeyboard: document.querySelector('.number-keyboard'),
-        keyboardContainer: document.querySelector('.keyboard-container'),
-        keyboardSystem: document.querySelector('.keyboard-system'),
-        inputPreview: document.querySelector('.input-preview'),
-        pinyinDisplay: document.querySelector('.pinyin-display'),
-        wordSuggestions: document.querySelector('.word-suggestions'),
-        inputText: document.querySelector('#inputText'),
-        pinyinInput: document.querySelector('#pinyinInput'),
-        inputDisplayArea: document.querySelector('.input-display-area'),
-        dropdownButton: document.querySelector('.dropdown-button'),
-        predictionPanel: document.querySelector('.prediction-panel'),
-        predictionRows: [
-            document.querySelector('#prediction-row-1'),
-            document.querySelector('#prediction-row-2'),
-            document.querySelector('#prediction-row-3'),
-            document.querySelector('#prediction-row-4')
-        ],
-        backspaceBtn: document.querySelector('.backspace-btn'),
-        upBtn: document.querySelector('.up-btn'),
-        downBtn: document.querySelector('.down-btn'),
-        returnBtn: document.querySelector('.return-btn')
-    };
-
-    // 私有方法
-    function calculateDistance(event) {
-        const touch1 = event.touches[0];
-        const touch2 = event.touches[1];
-        return Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-    }
-
-    function applyScale() {
-        const currentScale = Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE);
-        elements.keyboardContainer.style.transform = `scale(${currentScale})`;
-        elements.inputDisplayArea.style.transform = `scale(${currentScale})`;
-    }
-
-    function resetScale() {
-        scale = 1;
-        lastScale = 1;
-        applyScale();
-    }
-
-    function initScaling() {
-        elements.keyboardContainer.addEventListener('touchstart', (event) => {
-            if (event.touches.length === 2) {
-                event.preventDefault();
-                startDist = calculateDistance(event);
-            }
-
-            const now = Date.now();
-            if (now - lastTap < 300) {
-                event.preventDefault();
-                resetScale();
-            }
-            lastTap = now;
-        });
-
-        elements.keyboardContainer.addEventListener('touchmove', (event) => {
-            if (event.touches.length === 2) {
-                event.preventDefault();
-                const currentDist = calculateDistance(event);
-                scale = (currentDist / startDist) * lastScale;
-                applyScale();
-            }
-        });
-
-        elements.keyboardContainer.addEventListener('touchend', () => {
-            lastScale = scale;
-        });
-    }
-
-    // 初始化
-    initScaling();
-
-    // 公共API
-    return {
-        elements: elements
-    };
-})();
-
 document.addEventListener('DOMContentLoaded', () => {
-    // 创建一个对象来存储所有DOM元素引用
-    const elements = {
-        keyboard: document.querySelector('.keyboard'),
-        symbolKeyboard: document.querySelector('.symbol-keyboard'),
-        mathKeyboard: document.querySelector('.math-keyboard'),
-        numberKeyboard: document.querySelector('.number-keyboard'),
-        keyboardContainer: document.querySelector('.keyboard-container'),
-        keyboardSystem: document.querySelector('.keyboard-system'),
-        inputPreview: document.querySelector('.input-preview'),
-        pinyinDisplay: document.querySelector('.pinyin-display'),
-        wordSuggestions: document.querySelector('.word-suggestions'),
-        inputText: document.querySelector('#inputText'),
-        pinyinInput: document.querySelector('#pinyinInput'),
-        inputDisplayArea: document.querySelector('.input-display-area'),
-        dropdownButton: document.querySelector('.dropdown-button'),
-        predictionPanel: document.querySelector('.prediction-panel'),
-        predictionRows: [
-            document.querySelector('#prediction-row-1'),
-            document.querySelector('#prediction-row-2'),
-            document.querySelector('#prediction-row-3'),
-            document.querySelector('#prediction-row-4')
-        ],
-        backspaceBtn: document.querySelector('.backspace-btn'),
-        upBtn: document.querySelector('.up-btn'),
-        downBtn: document.querySelector('.down-btn'),
-        returnBtn: document.querySelector('.return-btn')
-    };
-
-    // 全局变量
-    let scale = 1;
-    let lastScale = 1;
-    let startDist = 0;
-    let lastTap = 0;
-    const MIN_SCALE = 0.5;
-    const MAX_SCALE = 2;
-    const DOUBLE_TAP_DELAY = 300;
-    
-    function getDistance(event) {
-        if (event.touches.length < 2) return 0;
-        const dx = event.touches[0].clientX - event.touches[1].clientX;
-        const dy = event.touches[0].clientY - event.touches[1].clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-    
-    function updateScale(scale) {
-        document.documentElement.style.setProperty('--keyboard-scale', scale);
-    }
-    
+    const keyboard = document.querySelector('.keyboard');
+    const symbolKeyboard = document.querySelector('.symbol-keyboard');
+    const mathKeyboard = document.querySelector('.math-keyboard');
+    const numberKeyboard = document.querySelector('.number-keyboard');
     const keyboardContainer = document.querySelector('.keyboard-container');
+    const keyboardSystem = document.querySelector('.keyboard-system');
+    const inputPreview = document.querySelector('.input-preview');
+    const pinyinDisplay = document.querySelector('.pinyin-display');
+    const wordSuggestions = document.querySelector('.word-suggestions');
+    const inputText = document.querySelector('#inputText');
+    const pinyinInput = document.querySelector('#pinyinInput');
+    // 添加预测字选择区域相关元素
+    const dropdownButton = document.querySelector('.dropdown-button');
+    const predictionPanel = document.querySelector('.prediction-panel');
+    const predictionRows = [
+        document.querySelector('#prediction-row-1'),
+        document.querySelector('#prediction-row-2'),
+        document.querySelector('#prediction-row-3'),
+        document.querySelector('#prediction-row-4')
+    ];
+    const backspaceBtn = document.querySelector('.backspace-btn');
+    const upBtn = document.querySelector('.up-btn');
+    const downBtn = document.querySelector('.down-btn');
+    const returnBtn = document.querySelector('.return-btn');
     
-    keyboardContainer.addEventListener('touchstart', (event) => {
-        if (event.touches.length === 2) {
-            event.preventDefault();
-            initialDistance = getDistance(event);
-        } else if (event.touches.length === 1) {
-            const now = Date.now();
-            if (now - lastTapTime < DOUBLE_TAP_DELAY) {
-                event.preventDefault();
-                currentScale = 1;
-                initialScale = 1;
-                updateScale(1);
-            }
-            lastTapTime = now;
-        }
-    });
-    
-    keyboardContainer.addEventListener('touchmove', (event) => {
-        if (event.touches.length === 2) {
-            event.preventDefault();
-            const distance = getDistance(event);
-            if (initialDistance > 0) {
-                currentScale = initialScale * (distance / initialDistance);
-                currentScale = Math.min(Math.max(currentScale, MIN_SCALE), MAX_SCALE);
-                updateScale(currentScale);
-            }
-        }
-    });
-    
-    keyboardContainer.addEventListener('touchend', () => {
-        if (initialDistance > 0) {
-            initialScale = currentScale;
-            initialDistance = 0;
-        }
-    });
-
     let currentInput = '';
     let isUpperCase = false;
     let isChineseMode = true; // 默认中文模式
@@ -448,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "url('icon/keyboard/english-icon.svg')";
     }
 
-    elements.keyboard.addEventListener('click', (e) => {
+    keyboard.addEventListener('click', (e) => {
         const key = e.target.closest('.key');
         if (!key) return;
         
@@ -480,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 符号键盘点击事件
-    elements.symbolKeyboard.addEventListener('click', (e) => {
+    symbolKeyboard.addEventListener('click', (e) => {
         const key = e.target.closest('.key');
         if (!key) return;
         
@@ -503,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 添加右键点击事件处理上方符号输入
-    elements.symbolKeyboard.addEventListener('contextmenu', (e) => {
+    symbolKeyboard.addEventListener('contextmenu', (e) => {
         e.preventDefault(); // 阻止默认右键菜单
         
         const key = e.target.closest('.key-symbol-key');
@@ -524,9 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 添加触摸事件处理下滑手势
-    elements.symbolKeyboard.addEventListener('touchstart', handleTouchStart, false);
-    elements.symbolKeyboard.addEventListener('touchmove', handleTouchMove, false);
-    elements.symbolKeyboard.addEventListener('touchend', handleTouchEnd, false);
+    symbolKeyboard.addEventListener('touchstart', handleTouchStart, false);
+    symbolKeyboard.addEventListener('touchmove', handleTouchMove, false);
+    symbolKeyboard.addEventListener('touchend', handleTouchEnd, false);
 
     let touchStartY = 0;
     let touchStartX = 0;
@@ -576,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 数学符号键盘点击事件
-    elements.mathKeyboard.addEventListener('click', (e) => {
+    mathKeyboard.addEventListener('click', (e) => {
         const key = e.target.closest('.key');
         if (!key) return;
         
@@ -601,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentInput += letter;
             
             // 更新拼音显示
-            elements.pinyinDisplay.textContent = currentInput;
+            pinyinDisplay.textContent = currentInput;
             
             // 显示候选词
             showPreviewArea();
@@ -624,13 +466,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function appendToDisplay(text) {
         displayText += text;
-        elements.inputText.textContent = displayText;
+        inputText.textContent = displayText;
         adjustInputAreaHeight();
     }
 
     function adjustInputAreaHeight() {
         const inputArea = document.querySelector('.input-display-area');
-        const textHeight = elements.inputText.offsetHeight;
+        const textHeight = inputText.offsetHeight;
         const minHeight = 120; // 最小高度
         const newHeight = Math.max(minHeight, textHeight + 40); // 40px 为上下padding的总和
         inputArea.style.height = `${newHeight}px`;
@@ -641,32 +483,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showPreviewArea() {
-        elements.keyboardSystem.style.display = 'none';
-        elements.inputPreview.style.display = 'flex';
-        elements.keyboardContainer.classList.add('expanded');
+        keyboardSystem.style.display = 'none';
+        inputPreview.style.display = 'flex';
+        keyboardContainer.classList.add('expanded');
         
         if (isChineseMode) {
             // 中文模式下显示拼音
-            elements.pinyinDisplay.style.display = 'flex';
-            elements.pinyinDisplay.textContent = currentInput;
+            pinyinDisplay.style.display = 'flex';
+            pinyinDisplay.textContent = currentInput;
             
             // 根据输入内容调整拼音显示区域的宽度
             const textWidth = currentInput.length * 28; // 每个字符28px
-            elements.pinyinDisplay.style.width = `${Math.max(50, textWidth + 30)}px`; // 加上padding的宽度
+            pinyinDisplay.style.width = `${Math.max(50, textWidth + 30)}px`; // 加上padding的宽度
         } else {
             // 英文模式下隐藏拼音显示区域
-            elements.pinyinDisplay.style.display = 'none';
+            pinyinDisplay.style.display = 'none';
         }
     }
 
     function hidePreviewArea() {
-        elements.keyboardSystem.style.display = 'flex';
-        elements.inputPreview.style.display = 'none';
-        elements.keyboardContainer.classList.remove('expanded');
+        keyboardSystem.style.display = 'flex';
+        inputPreview.style.display = 'none';
+        keyboardContainer.classList.remove('expanded');
         currentInput = '';
         selectedIndex = -1;
         // 确保预测面板也被隐藏
-        elements.predictionPanel.classList.remove('active');
+        predictionPanel.classList.remove('active');
     }
 
     function handleSpecialKey(key) {
@@ -675,11 +517,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isChineseMode && currentInput.length > 0) {
                 // 中文模式下，删除拼音输入的最后一个字符
                 currentInput = currentInput.slice(0, -1);
-                elements.pinyinDisplay.textContent = currentInput;
+                pinyinDisplay.textContent = currentInput;
                 
                 // 调整拼音显示区域的宽度
                 const textWidth = currentInput.length * 28;
-                elements.pinyinDisplay.style.width = `${Math.max(50, textWidth + 30)}px`;
+                pinyinDisplay.style.width = `${Math.max(50, textWidth + 30)}px`;
                 
                 if (currentInput.length === 0) {
                     // 如果拼音输入为空，隐藏预览区域
@@ -692,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 英文模式下，直接删除显示区域的最后一个字符
                 if (displayText.length > 0) {
                     displayText = displayText.slice(0, -1);
-                    elements.inputText.textContent = displayText;
+                    inputText.textContent = displayText;
                     adjustInputAreaHeight();
                     
                     // 更新英文输入
@@ -748,12 +590,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // 切换到符号键盘
             toggleSymbolKeyboard();
             // 确保预测面板隐藏
-            elements.predictionPanel.classList.remove('active');
+            predictionPanel.classList.remove('active');
         } else if (key.classList.contains('key-number')) {
             // 切换到数字键盘
             toggleNumberKeyboard();
             // 确保预测面板隐藏
-            elements.predictionPanel.classList.remove('active');
+            predictionPanel.classList.remove('active');
         } else if (key.classList.contains('key-emoji')) {
             // 处理表情键
             key.classList.add('pressed');
@@ -762,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 200);
         } else if (key.classList.contains('key-collapse')) {
             // 收起键盘
-            elements.keyboardContainer.classList.add('hidden');
+            keyboardContainer.classList.add('hidden');
         }
     }
 
@@ -771,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 处理退格键
             if (displayText.length > 0) {
                 displayText = displayText.slice(0, -1);
-                elements.inputText.textContent = displayText;
+                inputText.textContent = displayText;
                 adjustInputAreaHeight();
             }
         } else if (key.classList.contains('key-back-to-letters') || key.classList.contains('key-back')) {
@@ -803,15 +645,15 @@ document.addEventListener('DOMContentLoaded', () => {
         isMathKeyboard = false; // 确保数学键盘关闭
         isNumberKeyboard = false; // 确保数字键盘关闭
         if (isSymbolKeyboard) {
-            elements.keyboard.style.display = 'none';
-            elements.symbolKeyboard.style.display = 'block';
-            elements.mathKeyboard.style.display = 'none';
-            elements.numberKeyboard.style.display = 'none';
+            keyboard.style.display = 'none';
+            symbolKeyboard.style.display = 'block';
+            mathKeyboard.style.display = 'none';
+            numberKeyboard.style.display = 'none';
         } else {
-            elements.keyboard.style.display = 'block';
-            elements.symbolKeyboard.style.display = 'none';
-            elements.mathKeyboard.style.display = 'none';
-            elements.numberKeyboard.style.display = 'none';
+            keyboard.style.display = 'block';
+            symbolKeyboard.style.display = 'none';
+            mathKeyboard.style.display = 'none';
+            numberKeyboard.style.display = 'none';
         }
     }
 
@@ -823,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 清空当前拼音输入，但不隐藏预览区域
             currentInput = '';
-            elements.pinyinDisplay.textContent = '';
+            pinyinDisplay.textContent = '';
             
             // 保持预览区域显示，以便继续输入
             updateSuggestions();
@@ -854,12 +696,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 清除当前输入状态
         hidePreviewArea();
         currentInput = '';
-        elements.pinyinDisplay.textContent = '';
+        pinyinDisplay.textContent = '';
     }
 
     function updateSuggestions() {
         // 清空候选词区域
-        elements.wordSuggestions.innerHTML = '';
+        wordSuggestions.innerHTML = '';
         
         // 如果没有输入，隐藏预览区域并返回
         if (!currentInput || currentInput.length === 0) {
@@ -922,18 +764,18 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestionElement.className = 'suggestion';
             suggestionElement.textContent = candidate;
             suggestionElement.addEventListener('click', () => selectSuggestion(index));
-            elements.wordSuggestions.appendChild(suggestionElement);
+            wordSuggestions.appendChild(suggestionElement);
         });
         
         // 如果候选词超过8个，显示下拉按钮
         if (candidates.length > 8) {
-            elements.dropdownButton.style.display = 'flex';
+            dropdownButton.style.display = 'flex';
             // 保存所有候选词，供预测面板使用
             allPredictions = candidates;
             // 重置预测页码
             currentPredictionPage = 0;
         } else {
-            elements.dropdownButton.style.display = 'none';
+            dropdownButton.style.display = 'none';
         }
     }
 
@@ -965,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 添加点击候选词的功能
-    elements.wordSuggestions.addEventListener('click', (e) => {
+    wordSuggestions.addEventListener('click', (e) => {
         if (e.target.classList.contains('suggestion')) {
             const index = parseInt(e.target.dataset.index);
             selectSuggestion(index);
@@ -1002,13 +844,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 收起键盘 - 为所有收起按钮添加事件监听器
     collapseButtons.forEach(button => {
         button.addEventListener('click', () => {
-            elements.keyboardContainer.classList.add('hidden');
+            keyboardContainer.classList.add('hidden');
         });
     });
 
     // 点击输入区域显示键盘
     inputDisplayArea.addEventListener('click', () => {
-        elements.keyboardContainer.classList.remove('hidden');
+        keyboardContainer.classList.remove('hidden');
     });
 
     function handleMathKeyboardSpecialKey(key) {
@@ -1016,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 处理退格键
             if (displayText.length > 0) {
                 displayText = displayText.slice(0, -1);
-                elements.inputText.textContent = displayText;
+                inputText.textContent = displayText;
                 adjustInputAreaHeight();
             }
         } else if (key.classList.contains('key-back')) {
@@ -1049,18 +891,18 @@ document.addEventListener('DOMContentLoaded', () => {
         isMathKeyboard = !isMathKeyboard;
         isNumberKeyboard = false; // 确保数字键盘关闭
         if (isMathKeyboard) {
-            elements.symbolKeyboard.style.display = 'none';
-            elements.mathKeyboard.style.display = 'block';
-            elements.numberKeyboard.style.display = 'none';
+            symbolKeyboard.style.display = 'none';
+            mathKeyboard.style.display = 'block';
+            numberKeyboard.style.display = 'none';
         } else {
-            elements.symbolKeyboard.style.display = 'block';
-            elements.mathKeyboard.style.display = 'none';
-            elements.numberKeyboard.style.display = 'none';
+            symbolKeyboard.style.display = 'block';
+            mathKeyboard.style.display = 'none';
+            numberKeyboard.style.display = 'none';
         }
     }
 
     // 数字键盘点击事件
-    elements.numberKeyboard.addEventListener('click', (e) => {
+    numberKeyboard.addEventListener('click', (e) => {
         const key = e.target.closest('.key');
         if (!key) return;
         
@@ -1084,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 处理退格键
             if (displayText.length > 0) {
                 displayText = displayText.slice(0, -1);
-                elements.inputText.textContent = displayText;
+                inputText.textContent = displayText;
                 adjustInputAreaHeight();
             }
         } else if (key.classList.contains('key-back')) {
@@ -1120,7 +962,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 200);
         } else if (key.classList.contains('key-collapse')) {
             // 收起键盘
-            elements.keyboardContainer.classList.add('hidden');
+            keyboardContainer.classList.add('hidden');
         }
     }
 
@@ -1129,20 +971,20 @@ document.addEventListener('DOMContentLoaded', () => {
         isSymbolKeyboard = false; // 确保符号键盘关闭
         isMathKeyboard = false; // 确保数学键盘关闭
         if (isNumberKeyboard) {
-            elements.keyboard.style.display = 'none';
-            elements.symbolKeyboard.style.display = 'none';
-            elements.mathKeyboard.style.display = 'none';
-            elements.numberKeyboard.style.display = 'block';
+            keyboard.style.display = 'none';
+            symbolKeyboard.style.display = 'none';
+            mathKeyboard.style.display = 'none';
+            numberKeyboard.style.display = 'block';
         } else {
-            elements.keyboard.style.display = 'block';
-            elements.symbolKeyboard.style.display = 'none';
-            elements.mathKeyboard.style.display = 'none';
-            elements.numberKeyboard.style.display = 'none';
+            keyboard.style.display = 'block';
+            symbolKeyboard.style.display = 'none';
+            mathKeyboard.style.display = 'none';
+            numberKeyboard.style.display = 'none';
         }
     }
 
     // 添加右键点击事件处理数字输入
-    elements.keyboard.addEventListener('contextmenu', (e) => {
+    keyboard.addEventListener('contextmenu', (e) => {
         e.preventDefault(); // 阻止默认右键菜单
         
         const key = e.target.closest('.key-with-number');
@@ -1163,9 +1005,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 添加触摸事件处理下滑手势输入数字
-    elements.keyboard.addEventListener('touchstart', handleKeyboardTouchStart, false);
-    elements.keyboard.addEventListener('touchmove', handleKeyboardTouchMove, false);
-    elements.keyboard.addEventListener('touchend', handleKeyboardTouchEnd, false);
+    keyboard.addEventListener('touchstart', handleKeyboardTouchStart, false);
+    keyboard.addEventListener('touchmove', handleKeyboardTouchMove, false);
+    keyboard.addEventListener('touchend', handleKeyboardTouchEnd, false);
 
     let keyboardTouchStartY = 0;
     let keyboardTouchStartX = 0;
@@ -1308,16 +1150,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 添加下拉按钮点击事件
-    if (elements.dropdownButton) {
-        elements.dropdownButton.addEventListener('click', togglePredictionPanel);
+    if (dropdownButton) {
+        dropdownButton.addEventListener('click', togglePredictionPanel);
     }
 
     // 添加预测面板控制按钮事件
-    if (elements.backspaceBtn) {
-        elements.backspaceBtn.addEventListener('click', () => {
+    if (backspaceBtn) {
+        backspaceBtn.addEventListener('click', () => {
             if (currentInput.length > 0) {
                 currentInput = currentInput.slice(0, -1);
-                elements.pinyinDisplay.textContent = currentInput;
+                pinyinDisplay.textContent = currentInput;
                 
                 // 如果删除后没有输入了，隐藏预测面板并回到键盘初始页面
                 if (currentInput.length === 0) {
@@ -1331,8 +1173,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (elements.upBtn) {
-        elements.upBtn.addEventListener('click', () => {
+    if (upBtn) {
+        upBtn.addEventListener('click', () => {
             if (currentPredictionPage > 0) {
                 currentPredictionPage--;
                 updatePredictionPanel();
@@ -1340,8 +1182,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (elements.downBtn) {
-        elements.downBtn.addEventListener('click', () => {
+    if (downBtn) {
+        downBtn.addEventListener('click', () => {
             const maxPages = Math.ceil(allPredictions.length / 36);
             if (currentPredictionPage < maxPages - 1) {
                 currentPredictionPage++;
@@ -1350,14 +1192,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (elements.returnBtn) {
-        elements.returnBtn.addEventListener('click', hidePredictionPanel);
+    if (returnBtn) {
+        returnBtn.addEventListener('click', hidePredictionPanel);
     }
 
     // 切换预测字选择区域显示/隐藏
     function togglePredictionPanel() {
         console.log('切换预测面板');
-        if (elements.predictionPanel.classList.contains('active')) {
+        if (predictionPanel.classList.contains('active')) {
             hidePredictionPanel();
         } else {
             showPredictionPanel();
@@ -1366,17 +1208,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showPredictionPanel() {
         console.log('显示预测面板');
-        elements.predictionPanel.classList.add('active');
+        predictionPanel.classList.add('active');
         
         // 只隐藏当前活动的键盘
-        if (elements.symbolKeyboard.style.display === 'block') {
-            elements.symbolKeyboard.classList.add('keyboard-hidden');
-        } else if (elements.mathKeyboard.style.display === 'block') {
-            elements.mathKeyboard.classList.add('keyboard-hidden');
-        } else if (elements.numberKeyboard.style.display === 'block') {
-            elements.numberKeyboard.classList.add('keyboard-hidden');
+        if (symbolKeyboard.style.display === 'block') {
+            symbolKeyboard.classList.add('keyboard-hidden');
+        } else if (mathKeyboard.style.display === 'block') {
+            mathKeyboard.classList.add('keyboard-hidden');
+        } else if (numberKeyboard.style.display === 'block') {
+            numberKeyboard.classList.add('keyboard-hidden');
         } else {
-            elements.keyboard.classList.add('keyboard-hidden');
+            keyboard.classList.add('keyboard-hidden');
         }
         
         // 更新预测面板内容
@@ -1385,16 +1227,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hidePredictionPanel() {
         console.log('隐藏预测面板');
-        elements.predictionPanel.classList.remove('active');
+        predictionPanel.classList.remove('active');
         // 显示当前活动的键盘
-        if (elements.symbolKeyboard.style.display === 'block') {
-            elements.symbolKeyboard.classList.remove('keyboard-hidden');
-        } else if (elements.mathKeyboard.style.display === 'block') {
-            elements.mathKeyboard.classList.remove('keyboard-hidden');
-        } else if (elements.numberKeyboard.style.display === 'block') {
-            elements.numberKeyboard.classList.remove('keyboard-hidden');
+        if (symbolKeyboard.style.display === 'block') {
+            symbolKeyboard.classList.remove('keyboard-hidden');
+        } else if (mathKeyboard.style.display === 'block') {
+            mathKeyboard.classList.remove('keyboard-hidden');
+        } else if (numberKeyboard.style.display === 'block') {
+            numberKeyboard.classList.remove('keyboard-hidden');
         } else {
-            elements.keyboard.classList.remove('keyboard-hidden');
+            keyboard.classList.remove('keyboard-hidden');
         }
     }
 
@@ -1402,7 +1244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updatePredictionPanel() {
         console.log('更新预测面板内容');
         // 清空所有行
-        elements.predictionRows.forEach(row => {
+        predictionRows.forEach(row => {
             row.innerHTML = '';
         });
 
@@ -1459,13 +1301,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // 填充预测字到每一行
         for (let i = 0; i < currentPagePredictions.length; i++) {
             const rowIndex = Math.floor(i / wordsPerRow);
-            if (rowIndex < elements.predictionRows.length) {
+            if (rowIndex < predictionRows.length) {
                 const word = currentPagePredictions[i];
                 const wordElement = document.createElement('div');
                 wordElement.className = 'prediction-word';
                 wordElement.textContent = word;
                 wordElement.addEventListener('click', () => selectPredictionWord(word));
-                elements.predictionRows[rowIndex].appendChild(wordElement);
+                predictionRows[rowIndex].appendChild(wordElement);
             }
         }
 
@@ -1488,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
             appendToDisplay(word);
             // 清空当前拼音输入
             currentInput = '';
-            elements.pinyinDisplay.textContent = '';
+            pinyinDisplay.textContent = '';
             // 隐藏预测面板
             hidePredictionPanel();
             // 隐藏预览区域
@@ -1500,7 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 模拟退格键删除已输入的字符
                 if (displayText.length > 0) {
                     displayText = displayText.slice(0, -1);
-                    elements.inputText.textContent = displayText;
+                    inputText.textContent = displayText;
                 }
             }
             // 然后添加完整的单词

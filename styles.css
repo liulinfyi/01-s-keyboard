@@ -5,45 +5,22 @@
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-color: #F2F3F5;
-    overflow: hidden;
+    width: 1920px;
+    height: 1200px;
+    background-color: #F7F7F7;
     font-family: Arial, sans-serif;
     position: relative;
 }
 
-:root {
-    --keyboard-scale: 1;
-    --keyboard-width: min(100vw, 1821px);
-    --key-base-width: calc(var(--keyboard-width) / 14);
-    --key-spacing: 6px;
-    --key-height: 88px;
-    --font-size-normal: 38px;
-    --font-size-small: 26px;
-}
-
 .keyboard-container {
-    width: 100%;
-    max-width: var(--keyboard-width);
-    margin: 0 auto;
-    background-color: #F2F3F5;
-    border-radius: 10px 10px 0 0;
-    padding: 13px 0;
-    position: fixed;
+    width: 1920px;
+    height: 527px;
+    background-color: #E3E4E9;
+    position: absolute;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    will-change: transform;
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
-    z-index: 1000;
-    overflow: hidden;
+    left: 0;
+    transition: transform 0.3s ease;
+    transform: translateY(0);
 }
 
 .keyboard-container.hidden {
@@ -152,86 +129,54 @@ body {
 }
 
 .keyboard {
-    display: grid;
-    grid-template-columns: repeat(14, var(--key-base-width));
-    gap: var(--key-spacing);
-    padding: 0 var(--key-spacing);
-    margin: 0 auto;
-    width: fit-content;
+    padding: 0 20px;
+    margin-top: 20px;
 }
 
-/* 基础按键样式 */
-.key {
-    height: var(--key-height);
-    background-color: white;
-    border-radius: 5px;
-    font-size: var(--font-size-normal);
+.keyboard-row {
     display: flex;
-    align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    gap: 13px;
+    margin-bottom: 13px;
+    position: relative;
 }
 
-/* 功能键宽度设置 */
-.key-emoji, .key-backspace {
-    width: calc(var(--key-base-width) * 1.36);
-}
-
-.key-ab, .key-enter,
-.key-back-to-letters, .key-abc {
-    width: calc(var(--key-base-width) * 1.91);
-}
-
+/* 左侧功能键对齐 */
+.key-emoji,
+.key-ab,
 .key-shift-left,
+.key-symbol,
+.key-math,
+.key-back,
 .key-number-left {
-    width: calc(var(--key-base-width) * 2.45);
-}
-
-.key-shift-right,
-.key-number-right {
-    width: calc(var(--key-base-width) * 1.36);
-}
-
-.key-symbol, .key-math {
-    width: calc(var(--key-base-width) * 1.36);
-}
-
-.key-number,
-.key-pinyin-left, .key-pinyin-right {
-    width: calc(var(--key-base-width) * 1.55);
-}
-
-.key-space {
-    width: calc(var(--key-base-width) * 7.6);
-}
-
-/* 普通按键样式 */
-.key-letter,
-.key-symbol-key,
-.key-math-key,
-.key-number-key {
-    width: var(--key-base-width);
-}
-
-/* 功能键对齐 */
-.key-emoji, .key-ab, .key-shift-left,
-.key-symbol, .key-math, .key-back,
-.key-number-left, .key-back-to-letters,
-.key-abc, .key-symbol-left {
     padding-left: 30px;
     justify-content: flex-start !important;
 }
 
-.key-backspace, .key-enter,
-.key-shift-right, .key-collapse,
-.key-number-right, .key-symbol-right {
+/* 右侧功能键对齐 */
+.key-backspace,
+.key-enter,
+.key-shift-right,
+.key-collapse,
+.key-number-right {
     padding-right: 30px;
     justify-content: flex-end !important;
 }
 
+.key {
+    height: 88px;
+    border: none;
+    border-radius: 5px;
+    font-size: 38px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* 普通字母键 */
 .key-letter {
     width: 132px;
     background-color: #FFFFFF;
@@ -296,6 +241,63 @@ body {
     background-color: #9E9EA7;
 }
 
+.key-emoji, .key-backspace {
+    width: 179px;
+}
+
+.key-ab, .key-enter {
+    width: 252px;
+}
+
+.key-shift-left {
+    width: 324px;
+}
+
+.key-shift-right {
+    width: 179px;
+}
+
+.key-symbol {
+    width: 179px;
+}
+
+.key-math {
+    width: 179px;
+}
+
+.key-number {
+    width: 205px;
+}
+
+.key-space {
+    width: 1002px;
+    background-color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.key-language {
+    width: 205px;
+    background-size: 79px 34px;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    font-size: 0; /* 隐藏文本 */
+}
+
+.key-collapse {
+    width: 179px;
+}
+
+.key:hover {
+    opacity: 0.9;
+}
+
+.key:active {
+    transform: translateY(1px);
+}
+
 .key-letter.pressed {
     background-color: #C8C8D2;
     transition: background-color 0.2s ease;
@@ -324,18 +326,22 @@ body {
 }
 
 .input-display-area {
-    width: 100%;
-    max-width: min(100vw, 1821px);
-    margin: 0 auto;
-    position: relative;
+    width: 1820px;
+    min-height: 120px;
+    height: auto;
     background-color: #FFFFFF;
+    margin: 50px auto 20px;
+    border-radius: 5px;
     padding: 20px;
-    box-sizing: border-box;
-    transform: scale(var(--keyboard-scale));
-    transform-origin: bottom center;
-    will-change: transform;
-    touch-action: manipulation;
-    transition: transform 0.1s ease;
+    font-size: 38px;
+    color: #333333;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    position: relative;
+    transition: height 0.3s ease;
     line-height: 38px;
 }
 
@@ -482,8 +488,37 @@ body {
     width: 252px;
 }
 
+.key-number-left {
+    width: 324px;
+}
+
+.key-number-right {
+    width: 179px;
+}
+
 .key-pinyin-left, .key-pinyin-right {
     width: 205px;
+}
+
+/* 左侧功能键对齐 - 符号键盘 */
+.key-number-left,
+.key-back-to-letters,
+.key-back {
+    padding-left: 30px;
+    justify-content: flex-start !important;
+}
+
+/* 右侧功能键对齐 - 符号键盘 */
+.key-number-right {
+    padding-right: 30px;
+    justify-content: flex-end !important;
+}
+
+.key-number-left .key-icon,
+.key-number-right .key-icon {
+    width: 56px;
+    height: 26px;
+    object-fit: contain;
 }
 
 .key-pinyin-left .key-icon,
@@ -722,47 +757,4 @@ body {
     align-items: center;
     height: 38px;
     line-height: 1;
-}
-
-/* 响应式布局 */
-@media screen and (max-width: 768px) {
-    :root {
-        --keyboard-width: 100vw;
-        --key-base-width: calc(var(--keyboard-width) / 14);
-        --key-height: 60px;
-        --font-size-normal: 28px;
-        --font-size-small: 20px;
-        --key-spacing: 4px;
-    }
-}
-
-@media screen and (max-width: 480px) {
-    :root {
-        --key-height: 50px;
-        --font-size-normal: 24px;
-        --font-size-small: 18px;
-        --key-spacing: 3px;
-    }
-}
-
-/* 确保键盘内部元素也能正确缩放 */
-.keyboard, .symbol-keyboard, .math-keyboard, .number-keyboard {
-    transform-origin: bottom center;
-    will-change: transform;
-    touch-action: manipulation;
-}
-
-/* 添加过渡效果使缩放更流畅 */
-.keyboard-container, .input-display-area {
-    transition: transform 0.1s ease;
-}
-
-@media screen and (max-width: 768px) {
-    .keyboard-container {
-        transform-origin: bottom center;
-    }
-    
-    .input-display-area {
-        transform-origin: bottom center;
-    }
 } 
