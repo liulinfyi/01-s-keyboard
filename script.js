@@ -318,7 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendToDisplay(text) {
         const inputText = document.querySelector('#inputText');
         if (inputText) {
-            inputText.value += text;
+            displayText += text;
+            inputText.textContent = displayText;
             adjustInputAreaHeight();
         }
     }
@@ -345,10 +346,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleSpecialKey(key) {
         switch(key) {
             case 'backspace':
-                const inputText = document.querySelector('#inputText');
-                if (inputText) {
-                    inputText.value = inputText.value.slice(0, -1);
-                    adjustInputAreaHeight();
+                if (displayText.length > 0) {
+                    displayText = displayText.slice(0, -1);
+                    const inputText = document.querySelector('#inputText');
+                    if (inputText) {
+                        inputText.textContent = displayText;
+                        adjustInputAreaHeight();
+                    }
                 }
                 break;
             case 'enter':
