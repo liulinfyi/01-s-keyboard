@@ -290,34 +290,93 @@ document.addEventListener('DOMContentLoaded', () => {
             "url('icon/keyboard/english-icon.svg')";
     }
 
+    // 处理按键输入
+    function handleInput(letter) {
+        if (isChineseMode) {
+            // 中文模式下的处理
+            currentInput += letter;
+            pinyinDisplay.textContent = currentInput;
+            
+            // 更新候选词
+            updateSuggestions();
+            
+            // 显示候选词区域
+            showPreviewArea();
+        } else {
+            // 英文模式下的处理
+            if (isUpperCase) {
+                letter = letter.toUpperCase();
+            }
+            appendToDisplay(letter);
+            
+            // 更新英文单词提示
+            updateSuggestions();
+        }
+    }
+
+    // 添加文本到显示区域
+    function appendToDisplay(text) {
+        const inputText = document.querySelector('#inputText');
+        if (inputText) {
+            inputText.value += text;
+            adjustInputAreaHeight();
+        }
+    }
+
+    // 处理特殊按键
+    function handleSpecialKey(key) {
+        switch(key) {
+            case 'backspace':
+                const inputText = document.querySelector('#inputText');
+                if (inputText) {
+                    inputText.value = inputText.value.slice(0, -1);
+                    adjustInputAreaHeight();
+                }
+                break;
+            case 'enter':
+                appendToDisplay('\n');
+                break;
+            case 'space':
+                appendToDisplay(' ');
+                break;
+            case 'shift':
+                toggleCase();
+                break;
+            case 'language':
+                const languageKey = document.querySelector('.key-language');
+                if (languageKey) {
+                    toggleLanguageMode(languageKey);
+                }
+                break;
+            case 'symbol':
+                toggleSymbolKeyboard();
+                break;
+            case 'math':
+                toggleMathKeyboard();
+                break;
+            case 'number':
+                toggleNumberKeyboard();
+                break;
+            case 'ab':
+                togglePredictionPanel();
+                break;
+        }
+    }
+
+    // 处理按键点击事件
     keyboard.addEventListener('click', (e) => {
         const key = e.target.closest('.key');
         if (!key) return;
-        
-        // 按键动画效果
-        key.classList.add('pressed');
-        setTimeout(() => {
-            key.classList.remove('pressed');
-        }, 200);
 
-        // 处理逗号和句号键
-        if (key.classList.contains('key-comma') || key.classList.contains('key-period')) {
-            const symbol = isChineseMode ? 
-                (key.classList.contains('key-comma') ? '，' : '。') : 
-                (key.classList.contains('key-comma') ? ',' : '.');
-            appendToDisplay(symbol);
-            return;
-        }
+        const keyType = key.classList[1];
+        const keyContent = key.textContent.trim();
 
-        // 处理其他按键
-        if (key.classList.contains('key-letter')) {
-            const letter = key.textContent;
+        if (keyType === 'key-letter' || keyType === 'key-with-number') {
+            // 只获取字母部分，忽略数字
+            const letter = keyContent.replace(/[0-9]/g, '').trim();
             handleInput(letter);
-        } else if (key.classList.contains('key-with-number')) {
-            const letter = key.querySelector('.letter-bottom').textContent;
-            handleInput(letter);
-        } else {
-            handleSpecialKey(key);
+        } else if (keyType === 'key-special') {
+            handleSpecialKey(keyContent.toLowerCase());
         }
     });
 
@@ -437,51 +496,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function handleInput(letter) {
-        if (isChineseMode) {
-            // 更新当前输入
-            currentInput += letter;
-            
-            // 更新拼音显示
-            pinyinDisplay.textContent = currentInput;
-            
-            // 显示候选词
-            showPreviewArea();
-            updateSuggestions();
-        } else {
-            // 英文模式下同时在两个区域显示字母
-            const outputLetter = isUpperCase ? letter.toUpperCase() : letter;
-            
-            // 更新输入显示区域
-            appendToDisplay(outputLetter);
-            
-            // 更新当前输入以显示在预览区域
-            currentInput += letter.toLowerCase();
-            
-            // 显示预览区域并更新单词建议
-            showPreviewArea();
-            updateSuggestions();
-        }
-    }
-
-    function appendToDisplay(text) {
-        displayText += text;
-        inputText.textContent = displayText;
-        adjustInputAreaHeight();
-    }
-
-    function adjustInputAreaHeight() {
-        const inputArea = document.querySelector('.input-display-area');
-        const textHeight = inputText.offsetHeight;
-        const minHeight = 120; // 最小高度
-        const newHeight = Math.max(minHeight, textHeight + 40); // 40px 为上下padding的总和
-        inputArea.style.height = `${newHeight}px`;
-        
-        // 调整光标高度
-        const cursor = document.querySelector('.cursor');
-        cursor.style.height = `${textHeight}px`;
-    }
-
     function showPreviewArea() {
         keyboardSystem.style.display = 'none';
         inputPreview.style.display = 'flex';
@@ -510,319 +524,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 确保预测面板也被隐藏
         predictionPanel.classList.remove('active');
     }
-
-    function handleSpecialKey(key) {
-        if (key.classList.contains('key-backspace')) {
-            // 处理退格键
-            if (isChineseMode && currentInput.length > 0) {
-                // 中文模式下，删除拼音输入的最后一个字符
-                currentInput = currentInput.slice(0, -1);
-                pinyinDisplay.textContent = currentInput;
-                
-                // 调整拼音显示区域的宽度
-                const textWidth = currentInput.length * 28;
-                pinyinDisplay.style.width = `${Math.max(50, textWidth + 30)}px`;
-                
-                if (currentInput.length === 0) {
-                    // 如果拼音输入为空，隐藏预览区域
-                    hidePreviewArea();
-                } else {
-                    // 否则更新候选词
-                    updateSuggestions();
-                }
-            } else {
-                // 英文模式下，直接删除显示区域的最后一个字符
-                if (displayText.length > 0) {
-                    displayText = displayText.slice(0, -1);
-                    inputText.textContent = displayText;
-                    adjustInputAreaHeight();
-                    
-                    // 更新英文输入
-                    if (!isChineseMode && currentInput.length > 0) {
-                        currentInput = currentInput.slice(0, -1);
-                        if (currentInput.length === 0) {
-                            hidePreviewArea();
-                        } else {
-                            updateSuggestions();
-                        }
-                    }
-                }
-            }
-        } else if (key.classList.contains('key-shift-left') || key.classList.contains('key-shift-right')) {
-            // 处理大小写切换
-            isUpperCase = !isUpperCase;
-            toggleCase();
-            
-            // 添加视觉反馈
-            key.classList.add('pressed');
-            setTimeout(() => {
-                key.classList.remove('pressed');
-            }, 200);
-        } else if (key.classList.contains('key-space')) {
-            // 处理空格键
-            if (isChineseMode && currentInput.length > 0) {
-                // 中文模式下，如果有拼音输入，选择第一个候选词
-                const suggestions = document.querySelectorAll('.suggestion');
-                if (suggestions.length > 0) {
-                    selectSuggestion(0);
-                }
-            } else {
-                // 否则直接输入空格
-                appendToDisplay(' ');
-            }
-        } else if (key.classList.contains('key-enter')) {
-            // 处理回车键
-            if (isChineseMode && currentInput.length > 0) {
-                // 中文模式下，如果有拼音输入，选择第一个候选词
-                const suggestions = document.querySelectorAll('.suggestion');
-                if (suggestions.length > 0) {
-                    selectSuggestion(0);
-                }
-            } else {
-                // 否则直接输入换行
-                appendToDisplay('\n');
-                adjustInputAreaHeight();
-            }
-        } else if (key.classList.contains('key-language')) {
-            // 处理中英文切换
-            toggleLanguageMode(key);
-        } else if (key.classList.contains('key-symbol')) {
-            // 切换到符号键盘
-            toggleSymbolKeyboard();
-            // 确保预测面板隐藏
-            predictionPanel.classList.remove('active');
-        } else if (key.classList.contains('key-number')) {
-            // 切换到数字键盘
-            toggleNumberKeyboard();
-            // 确保预测面板隐藏
-            predictionPanel.classList.remove('active');
-        } else if (key.classList.contains('key-emoji')) {
-            // 处理表情键
-            key.classList.add('pressed');
-            setTimeout(() => {
-                key.classList.remove('pressed');
-            }, 200);
-        } else if (key.classList.contains('key-collapse')) {
-            // 收起键盘
-            keyboardContainer.classList.add('hidden');
-        }
-    }
-
-    function handleSymbolKeyboardSpecialKey(key) {
-        if (key.classList.contains('key-backspace')) {
-            // 处理退格键
-            if (displayText.length > 0) {
-                displayText = displayText.slice(0, -1);
-                inputText.textContent = displayText;
-                adjustInputAreaHeight();
-            }
-        } else if (key.classList.contains('key-back-to-letters') || key.classList.contains('key-back')) {
-            // 返回字母键盘
-            toggleSymbolKeyboard();
-        } else if (key.classList.contains('key-space')) {
-            // 处理空格键
-            appendToDisplay(' ');
-            adjustInputAreaHeight();
-        } else if (key.classList.contains('key-enter')) {
-            // 处理回车键
-            appendToDisplay('\n');
-            adjustInputAreaHeight();
-        } else if (key.classList.contains('key-pinyin-left') || key.classList.contains('key-pinyin-right')) {
-            // 返回字母键盘
-            toggleSymbolKeyboard();
-        } else if (key.classList.contains('key-number-left') || key.classList.contains('key-number-right')) {
-            // 切换到数字键盘
-            toggleSymbolKeyboard();
-            toggleNumberKeyboard();
-        } else if (key.classList.contains('key-math')) {
-            // 切换到数学符号键盘
-            toggleMathKeyboard();
-        }
-    }
-
-    function toggleSymbolKeyboard() {
-        isSymbolKeyboard = !isSymbolKeyboard;
-        isMathKeyboard = false; // 确保数学键盘关闭
-        isNumberKeyboard = false; // 确保数字键盘关闭
-        if (isSymbolKeyboard) {
-            keyboard.style.display = 'none';
-            symbolKeyboard.style.display = 'block';
-            mathKeyboard.style.display = 'none';
-            numberKeyboard.style.display = 'none';
-        } else {
-            keyboard.style.display = 'block';
-            symbolKeyboard.style.display = 'none';
-            mathKeyboard.style.display = 'none';
-            numberKeyboard.style.display = 'none';
-        }
-    }
-
-    function selectSuggestion(index) {
-        const suggestions = document.querySelectorAll('.suggestion');
-        if (suggestions.length > index) {
-            const selectedWord = suggestions[index].textContent;
-            appendToDisplay(selectedWord);
-            
-            // 清空当前拼音输入，但不隐藏预览区域
-            currentInput = '';
-            pinyinDisplay.textContent = '';
-            
-            // 保持预览区域显示，以便继续输入
-            updateSuggestions();
-        }
-    }
-
-    function toggleLanguageMode(key) {
-        isChineseMode = !isChineseMode;
-        
-        // 更新语言图标
-        key.style.backgroundImage = isChineseMode ? 
-            "url('icon/keyboard/chinese-icon.svg')" : 
-            "url('icon/keyboard/english-icon.svg')";
-        
-        // 更新逗号和句号键的显示
-        const commaKey = document.querySelector('.key-comma');
-        const periodKey = document.querySelector('.key-period');
-        
-        if (commaKey) {
-            commaKey.querySelector('.symbol-top').textContent = isChineseMode ? '，' : ',';
-            commaKey.querySelector('.symbol-bottom').textContent = isChineseMode ? '，' : ',';
-        }
-        if (periodKey) {
-            periodKey.querySelector('.symbol-top').textContent = isChineseMode ? '。' : '.';
-            periodKey.querySelector('.symbol-bottom').textContent = isChineseMode ? '。' : '.';
-        }
-        
-        // 清除当前输入状态
-        hidePreviewArea();
-        currentInput = '';
-        pinyinDisplay.textContent = '';
-    }
-
-    function updateSuggestions() {
-        // 清空候选词区域
-        wordSuggestions.innerHTML = '';
-        
-        // 如果没有输入，隐藏预览区域并返回
-        if (!currentInput || currentInput.length === 0) {
-            hidePreviewArea();
-            return;
-        }
-        
-        // 显示预览区域
-        showPreviewArea();
-        
-        // 获取候选词
-        let candidates = [];
-        
-        if (isChineseMode) {
-            // 中文模式下获取拼音候选词
-            // 首先尝试从pinyinMap中获取完全匹配的拼音
-            if (pinyinMap[currentInput]) {
-                candidates = pinyinMap[currentInput];
-            } else {
-                // 如果没有完全匹配，使用智能匹配
-                candidates = intelligentPinyinMatch(currentInput);
-            }
-        } else {
-            // 英文模式下使用englishMap进行匹配
-            const inputLower = currentInput.toLowerCase();
-            candidates = englishMap[inputLower] || [];
-            
-            // 如果没有直接匹配，尝试查找以当前输入开头的单词
-            if (candidates.length === 0 && inputLower.length > 0) {
-                console.log('尝试查找以当前输入开头的单词:', inputLower);
-                // 遍历所有单字母键，查找以当前输入开头的单词
-                Object.keys(englishMap).forEach(key => {
-                    if (key.length === 1) {
-                        englishMap[key].forEach(word => {
-                            if (word.toLowerCase().startsWith(inputLower) && !candidates.includes(word)) {
-                                candidates.push(word);
-                            }
-                        });
-                    }
-                });
-                
-                // 按长度排序，优先显示较短的单词
-                candidates.sort((a, b) => a.length - b.length);
-                
-                // 限制结果数量
-                candidates = candidates.slice(0, 8);
-            }
-            
-            if (isUpperCase) {
-                candidates = candidates.map(word => word.toUpperCase());
-            }
-        }
-        
-        console.log(`找到 ${candidates.length} 个候选词`);
-        
-        // 显示候选词（最多显示8个）
-        const displayCandidates = candidates.slice(0, 8);
-        displayCandidates.forEach((candidate, index) => {
-            const suggestionElement = document.createElement('div');
-            suggestionElement.className = 'suggestion';
-            suggestionElement.textContent = candidate;
-            suggestionElement.addEventListener('click', () => selectSuggestion(index));
-            wordSuggestions.appendChild(suggestionElement);
-        });
-        
-        // 如果候选词超过8个，显示下拉按钮
-        if (candidates.length > 8) {
-            dropdownButton.style.display = 'flex';
-            // 保存所有候选词，供预测面板使用
-            allPredictions = candidates;
-            // 重置预测页码
-            currentPredictionPage = 0;
-        } else {
-            dropdownButton.style.display = 'none';
-        }
-    }
-
-    function toggleCase() {
-        const letterKeys = document.querySelectorAll('.key-letter');
-        letterKeys.forEach(key => {
-            // 检查是否是带数字的字母键
-            const letterBottom = key.querySelector('.letter-bottom');
-            if (letterBottom) {
-                // 如果是带数字的字母键，只改变字母部分
-                if (/[A-Za-z]/.test(letterBottom.textContent)) {
-                    letterBottom.textContent = isUpperCase 
-                        ? letterBottom.textContent.toUpperCase() 
-                        : letterBottom.textContent.toLowerCase();
-                }
-            } else {
-                // 如果是普通字母键
-                if (/[A-Za-z]/.test(key.textContent)) {
-                    key.textContent = isUpperCase 
-                        ? key.textContent.toUpperCase() 
-                        : key.textContent.toLowerCase();
-                }
-            }
-        });
-        
-        if (!isChineseMode && currentInput.length > 0) {
-            updateSuggestions();
-        }
-    }
-
-    // 添加点击候选词的功能
-    wordSuggestions.addEventListener('click', (e) => {
-        if (e.target.classList.contains('suggestion')) {
-            const index = parseInt(e.target.dataset.index);
-            selectSuggestion(index);
-        }
-    });
-
-    // 添加数字键选词功能
-    document.addEventListener('keydown', (e) => {
-        if (isChineseMode && currentInput.length > 0) {
-            const num = parseInt(e.key);
-            if (!isNaN(num) && num >= 1 && num <= 5) {
-                selectSuggestion(num - 1);
-            }
-        }
-    });
 
     function handleSpecialKeyPress(key) {
         key.classList.add('pressed');
@@ -1353,6 +1054,186 @@ document.addEventListener('DOMContentLoaded', () => {
             hidePredictionPanel();
             // 隐藏预览区域
             hidePreviewArea();
+        }
+    }
+
+    function toggleCase() {
+        const letterKeys = document.querySelectorAll('.key-letter');
+        letterKeys.forEach(key => {
+            // 检查是否是带数字的字母键
+            const letterBottom = key.querySelector('.letter-bottom');
+            if (letterBottom) {
+                // 如果是带数字的字母键，只改变字母部分
+                if (/[A-Za-z]/.test(letterBottom.textContent)) {
+                    letterBottom.textContent = isUpperCase 
+                        ? letterBottom.textContent.toUpperCase() 
+                        : letterBottom.textContent.toLowerCase();
+                }
+            } else {
+                // 如果是普通字母键
+                if (/[A-Za-z]/.test(key.textContent)) {
+                    key.textContent = isUpperCase 
+                        ? key.textContent.toUpperCase() 
+                        : key.textContent.toLowerCase();
+                }
+            }
+        });
+        
+        if (!isChineseMode && currentInput.length > 0) {
+            updateSuggestions();
+        }
+    }
+
+    // 添加点击候选词的功能
+    wordSuggestions.addEventListener('click', (e) => {
+        if (e.target.classList.contains('suggestion')) {
+            const index = parseInt(e.target.dataset.index);
+            selectSuggestion(index);
+        }
+    });
+
+    // 添加数字键选词功能
+    document.addEventListener('keydown', (e) => {
+        if (isChineseMode && currentInput.length > 0) {
+            const num = parseInt(e.key);
+            if (!isNaN(num) && num >= 1 && num <= 5) {
+                selectSuggestion(num - 1);
+            }
+        }
+    });
+
+    function handleSpecialKeyPress(key) {
+        key.classList.add('pressed');
+        setTimeout(() => {
+            key.classList.remove('pressed');
+        }, 200);
+    }
+
+    document.querySelectorAll('.key-special').forEach(key => {
+        key.addEventListener('click', function() {
+            handleSpecialKeyPress(this);
+        });
+    });
+
+    function toggleLanguageMode(key) {
+        isChineseMode = !isChineseMode;
+        
+        // 更新语言图标
+        key.style.backgroundImage = isChineseMode ? 
+            "url('icon/keyboard/chinese-icon.svg')" : 
+            "url('icon/keyboard/english-icon.svg')";
+        
+        // 更新逗号和句号键的显示
+        const commaKey = document.querySelector('.key-comma');
+        const periodKey = document.querySelector('.key-period');
+        
+        if (commaKey) {
+            commaKey.querySelector('.symbol-top').textContent = isChineseMode ? '，' : ',';
+            commaKey.querySelector('.symbol-bottom').textContent = isChineseMode ? '，' : ',';
+        }
+        if (periodKey) {
+            periodKey.querySelector('.symbol-top').textContent = isChineseMode ? '。' : '.';
+            periodKey.querySelector('.symbol-bottom').textContent = isChineseMode ? '。' : '.';
+        }
+        
+        // 清除当前输入状态
+        hidePreviewArea();
+        currentInput = '';
+        pinyinDisplay.textContent = '';
+    }
+
+    function updateSuggestions() {
+        // 清空候选词区域
+        wordSuggestions.innerHTML = '';
+        
+        // 如果没有输入，隐藏预览区域并返回
+        if (!currentInput || currentInput.length === 0) {
+            hidePreviewArea();
+            return;
+        }
+        
+        // 显示预览区域
+        showPreviewArea();
+        
+        // 获取候选词
+        let candidates = [];
+        
+        if (isChineseMode) {
+            // 中文模式下获取拼音候选词
+            // 首先尝试从pinyinMap中获取完全匹配的拼音
+            if (pinyinMap[currentInput]) {
+                candidates = pinyinMap[currentInput];
+            } else {
+                // 如果没有完全匹配，使用智能匹配
+                candidates = intelligentPinyinMatch(currentInput);
+            }
+        } else {
+            // 英文模式下使用englishMap进行匹配
+            const inputLower = currentInput.toLowerCase();
+            candidates = englishMap[inputLower] || [];
+            
+            // 如果没有直接匹配，尝试查找以当前输入开头的单词
+            if (candidates.length === 0 && inputLower.length > 0) {
+                console.log('尝试查找以当前输入开头的单词:', inputLower);
+                // 遍历所有单字母键，查找以当前输入开头的单词
+                Object.keys(englishMap).forEach(key => {
+                    if (key.length === 1) {
+                        englishMap[key].forEach(word => {
+                            if (word.toLowerCase().startsWith(inputLower) && !candidates.includes(word)) {
+                                candidates.push(word);
+                            }
+                        });
+                    }
+                });
+                
+                // 按长度排序，优先显示较短的单词
+                candidates.sort((a, b) => a.length - b.length);
+                
+                // 限制结果数量
+                candidates = candidates.slice(0, 8);
+            }
+            
+            if (isUpperCase) {
+                candidates = candidates.map(word => word.toUpperCase());
+            }
+        }
+        
+        console.log(`找到 ${candidates.length} 个候选词`);
+        
+        // 显示候选词（最多显示8个）
+        const displayCandidates = candidates.slice(0, 8);
+        displayCandidates.forEach((candidate, index) => {
+            const suggestionElement = document.createElement('div');
+            suggestionElement.className = 'suggestion';
+            suggestionElement.textContent = candidate;
+            suggestionElement.addEventListener('click', () => selectSuggestion(index));
+            wordSuggestions.appendChild(suggestionElement);
+        });
+        
+        // 如果候选词超过8个，显示下拉按钮
+        if (candidates.length > 8) {
+            dropdownButton.style.display = 'flex';
+            // 保存所有候选词，供预测面板使用
+            allPredictions = candidates;
+            // 重置预测页码
+            currentPredictionPage = 0;
+        } else {
+            dropdownButton.style.display = 'none';
+        }
+    }
+
+    function selectSuggestion(index) {
+        const suggestions = document.querySelectorAll('.suggestion');
+        if (suggestions.length > index) {
+            const selectedWord = suggestions[index].textContent;
+            appendToDisplay(selectedWord);
+            
+            // 清空当前拼音输入，但不隐藏预览区域
+            currentInput = '';
+            pinyinDisplay.textContent = '';
+            
+            // 保持预览区域显示，以便继续输入
+            updateSuggestions();
         }
     }
 }); 
