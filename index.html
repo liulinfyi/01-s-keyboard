@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <link rel="icon" type="image/svg+xml" href="icons/keyboard/input.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="虚拟键盘">
+    <meta name="theme-color" content="#4285f4">
     <title>虚拟键盘</title>
     <link rel="stylesheet" href="styles.css">
     <!-- 使用 CDN 加载 pinyin-pro 库 -->
@@ -26,6 +32,19 @@
                 console.error('拼音库初始化错误:', e);
             }
         });
+        
+        // 注册Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker 注册成功，作用域:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker 注册失败:', error);
+                    });
+            });
+        }
     </script>
     <!-- 然后加载主脚本 -->
     <script src="script.js" defer></script>
