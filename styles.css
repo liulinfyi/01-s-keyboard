@@ -148,7 +148,7 @@ body {
     height: 39px;
 }
 
-.keyboard {
+.keyboard, .symbol-keyboard, .math-keyboard, .number-keyboard {
     display: grid;
     grid-template-columns: repeat(16, 1fr);
     gap: 6px;
@@ -159,11 +159,8 @@ body {
     margin: 0 auto;
 }
 
-.keyboard-row {
-    display: contents;
-}
-
-.key {
+/* 统一所有键盘的按键基础样式 */
+.key, .key-symbol-key, .key-math-key, .key-number-key {
     min-width: 0;
     height: 40px;
     display: flex;
@@ -180,29 +177,51 @@ body {
     text-overflow: ellipsis;
 }
 
-/* 左侧功能键对齐 */
-.key-emoji,
-.key-ab,
+/* 统一所有功能键的宽度 */
+.key-emoji, .key-backspace, 
+.key-symbol-left, .key-symbol-right,
+.key-math-left, .key-math-right {
+    width: calc(var(--key-base-width) * 1.36);
+}
+
+.key-ab, .key-enter,
+.key-back-to-letters, .key-back,
+.key-abc {
+    width: calc(var(--key-base-width) * 1.91);
+}
+
 .key-shift-left,
-.key-symbol,
-.key-math,
-.key-back,
 .key-number-left {
+    width: calc(var(--key-base-width) * 2.45);
+}
+
+.key-shift-right,
+.key-number-right {
+    width: calc(var(--key-base-width) * 1.36);
+}
+
+.key-symbol, .key-math {
+    width: calc(var(--key-base-width) * 1.36);
+}
+
+.key-space {
+    width: calc(var(--key-base-width) * 7.6);
+}
+
+/* 统一所有键盘的左右对齐样式 */
+.key-emoji, .key-ab, .key-shift-left, .key-symbol, .key-math,
+.key-number-left, .key-back-to-letters, .key-back,
+.key-symbol-left, .key-abc {
     padding-left: 30px;
     justify-content: flex-start !important;
 }
 
-/* 右侧功能键对齐 */
-.key-backspace,
-.key-enter,
-.key-shift-right,
-.key-collapse,
-.key-number-right {
+.key-backspace, .key-enter, .key-shift-right, .key-collapse,
+.key-number-right, .key-symbol-right {
     padding-right: 30px;
     justify-content: flex-end !important;
 }
 
-/* 普通字母键 */
 .key-letter {
     width: 132px;
     background-color: #FFFFFF;
@@ -265,63 +284,6 @@ body {
 
 .key-special.pressed {
     background-color: #9E9EA7;
-}
-
-.key-emoji, .key-backspace {
-    width: 179px;
-}
-
-.key-ab, .key-enter {
-    width: 252px;
-}
-
-.key-shift-left {
-    width: 324px;
-}
-
-.key-shift-right {
-    width: 179px;
-}
-
-.key-symbol {
-    width: 179px;
-}
-
-.key-math {
-    width: 179px;
-}
-
-.key-number {
-    width: 205px;
-}
-
-.key-space {
-    width: 1002px;
-    background-color: #FFFFFF;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.key-language {
-    width: 205px;
-    background-size: 79px 34px;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
-    font-size: 0; /* 隐藏文本 */
-}
-
-.key-collapse {
-    width: 179px;
-}
-
-.key:hover {
-    opacity: 0.9;
-}
-
-.key:active {
-    transform: translateY(1px);
 }
 
 .key-letter.pressed {
@@ -510,37 +472,8 @@ body {
     width: 252px;
 }
 
-.key-number-left {
-    width: 324px;
-}
-
-.key-number-right {
-    width: 179px;
-}
-
 .key-pinyin-left, .key-pinyin-right {
     width: 205px;
-}
-
-/* 左侧功能键对齐 - 符号键盘 */
-.key-number-left,
-.key-back-to-letters,
-.key-back {
-    padding-left: 30px;
-    justify-content: flex-start !important;
-}
-
-/* 右侧功能键对齐 - 符号键盘 */
-.key-number-right {
-    padding-right: 30px;
-    justify-content: flex-end !important;
-}
-
-.key-number-left .key-icon,
-.key-number-right .key-icon {
-    width: 56px;
-    height: 26px;
-    object-fit: contain;
 }
 
 .key-pinyin-left .key-icon,
@@ -968,8 +901,7 @@ body {
         padding: 0 8px;
     }
     
-    .key {
-        width: calc(100vw / 16);
+    .key, .key-symbol-key, .key-math-key, .key-number-key {
         height: 35px;
         font-size: 14px;
     }
@@ -1055,7 +987,7 @@ body {
         padding: 0 6px;
     }
 
-    .key {
+    .key, .key-symbol-key, .key-math-key, .key-number-key {
         height: 30px;
         font-size: 12px;
     }
